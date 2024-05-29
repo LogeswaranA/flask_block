@@ -8,6 +8,7 @@ class Blockchain():
         self.accountModel = AccountModel()
 
     def addBlock(self,block):
+        self.executeTransactions(block.transactions)
         self.blocks.append(block)
 
     def toJson(self):
@@ -41,8 +42,24 @@ class Blockchain():
         return coveredTransactions
         
     def transactionCovered(self,transaction):
+        if transaction.txnType=="EXCHANGE":
+            return True
         senderbalance = self.accountModel.getBalance(transaction.sender)
         if senderbalance >= transaction.amount:
             return True
         else:
             return False
+        
+    def executeTransactions(self,transactions):
+        for txn in transactions:
+            self.executeTransaction(txn)
+
+
+    def executeTransaction(self,transaction):
+        sender = transaction.sender
+        receiver = transaction.receiver
+        amount = transaction.amount
+        self.accountModel.updateBalance(sender,-amount)
+        self.accountModel.updateBalance(receiver,amount)
+
+
